@@ -33,7 +33,7 @@ Bu proje tek bir HTML dosyasından oluşur. Herhangi bir kuruluma, sunucuya veya
 
 ## 📸 Ekran Görüntüleri
 
-*(Buraya projenin ekran görüntülerini ekleyebilirsiniz)*
+![Neon Generator Screenshot](screenshot.png)
 
 ## 🤝 Katkıda Bulunma
 
