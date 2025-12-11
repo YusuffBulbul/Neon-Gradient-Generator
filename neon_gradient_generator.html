@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Renk Geçişi Oluşturucu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: '#0f172a',
+                        card: '#1e293b',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Background Glow Animation */
+        .bg-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, rgba(76, 29, 149, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .gradient-box {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .gradient-box:hover {
+            transform: scale(1.02);
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+
+        /* Custom Color Input Wrapper */
+        .color-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .color-wrapper:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            border-color: #ffffff;
+        }
+
+        input[type="color"] {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150%;
+            height: 150%;
+            padding: 0;
+            margin: 0;
+            border: none;
+            cursor: pointer;
+            background: none;
+        }
+
+        .btn-neon {
+            background: linear-gradient(90deg, #ec4899, #8b5cf6);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-neon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, #8b5cf6, #ec4899);
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-neon:hover::before {
+            opacity: 1;
+        }
+
+        .btn-neon:hover {
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .preset-circle {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .preset-circle:hover {
+            transform: scale(1.1);
+            border-color: white;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .saved-item {
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .saved-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateX(5px);
+        }
+
+        .delete-btn {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .saved-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        /* Code Block */
+        .code-block {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #0f172a;
+            border: 1px solid #334155;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="bg-glow"></div>
+
+    <div
+        class="w-full max-w-7xl bg-card/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl relative animate-fade-in-up">
+
+        <!-- Header -->
+        <header class="text-center mb-10 col-span-full">
+            <h1
+                class="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 tracking-tight pb-2">
+                Neon Oluşturucu
+            </h1>
+            <p class="text-gray-400 mt-2 text-lg">Anında çarpıcı renk geçişleri oluşturun.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+
+            <!-- Column 1: Preview & Output -->
+            <div class="flex flex-col gap-6">
+                <!-- Preview Box -->
+                <div id="gradientPreview"
+                    class="gradient-box w-full aspect-video rounded-2xl relative group shadow-2xl">
+                    <div
+                        class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none">
+                    </div>
+                </div>
+
+                <!-- Code Block -->
+                <div
+                    class="bg-[#0f172a]/80 backdrop-blur-md rounded-xl p-6 border border-white/10 shadow-lg relative overflow-hidden transition-all duration-300 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                    <div
+                        class="absolute top-0 right-0 bg-white/10 px-3 py-1 rounded-bl-xl text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+                        CSS Kodu
+                    </div>
+                    <div class="font-mono text-sm break-all pt-2">
+                        <code id="cssOutput"
+                            class="block whitespace-pre-line text-white selection:bg-white/30 tracking-wide"
+                            style="text-shadow: 0 0 10px rgba(255,255,255,0.7), 0 0 20px rgba(255,255,255,0.3);">background: linear-gradient(135deg, #FF00CC, #333399);</code>
+                    </div>
+                </div>
+
+                <!-- Save & Copy Group -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button id="saveBtn"
+                        class="flex items-center justify-center gap-2 py-3 rounded-xl bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/50 hover:border-green-400 transition-all shadow-[0_0_15px_rgba(34,197,94,0.1)] hover:shadow-[0_0_25px_rgba(34,197,94,0.3)] font-bold group">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
+                        <span>Kaydet</span>
+                    </button>
+
+                    <button id="copyBtn"
+                        class="flex items-center justify-center gap-2 py-3 rounded-xl btn-neon text-white font-bold shadow-lg group">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span>Kopyala</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Column 2: Controls (Inputs) -->
+            <div class="space-y-8 bg-white/5 p-6 rounded-2xl border border-white/5 shadow-xl h-full">
+
+                <!-- Linear/Radial Toggle -->
+                <div class="flex items-center justify-between gap-4 mb-2">
+                    <div class="flex bg-black/40 p-1 rounded-lg">
+                        <button id="typeLinear"
+                            class="type-btn active px-4 py-1.5 rounded-md text-sm font-bold transition-all text-white bg-white/10 shadow-lg">Linear</button>
+                        <button id="typeRadial"
+                            class="type-btn px-4 py-1.5 rounded-md text-sm font-bold transition-all text-gray-400 hover:text-white">Radial</button>
+                    </div>
+
+                    <button id="randomBtn"
+                        class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm text-pink-400 font-bold transition-all hover:scale-105 active:scale-95 group">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 group-hover:rotate-180 transition-transform duration-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Rastgele</span>
+                    </button>
+                </div>
+
+                <!-- Color Pickers -->
+                <div class="space-y-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">Renkler ve Tonlar</h3>
+
+                    <!-- Color 1 -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-400">Başlangıç Rengi</span>
+                            <span class="text-xs font-mono text-gray-500" id="color1Label">#FF00CC</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="color-wrapper flex-shrink-0" style="border-color: #FF00CC" id="color1Wrapper">
+                                <input type="color" id="color1" value="#FF00CC">
+                            </div>
+                            <input type="range" id="hue1" min="0" max="360" value="300"
+                                class="hue-slider w-full h-3 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- Color 2 -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-400">Bitiş Rengi</span>
+                            <span class="text-xs font-mono text-gray-500" id="color2Label">#333399</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="color-wrapper flex-shrink-0" style="border-color: #333399" id="color2Wrapper">
+                                <input type="color" id="color2" value="#333399">
+                            </div>
+                            <input type="range" id="hue2" min="0" max="360" value="240"
+                                class="hue-slider w-full h-3 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Angle -->
+                <div class="space-y-4 pt-4 border-t border-white/10" id="angleContainer">
+                    <div class="flex justify-between items-center">
+                        <label for="angle" class="text-white font-medium">Açı</label>
+                        <span id="angleValue" class="text-pink-500 font-mono font-bold">135°</span>
+                    </div>
+                    <input type="range" id="angle" min="0" max="360" value="135"
+                        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Presets -->
+                <div class="space-y-4 pt-4 border-t border-white/10">
+                    <h3 class="text-xl font-semibold text-white mb-2">Ayarlar</h3>
+                    <div class="grid grid-cols-5 gap-2" id="presetsGrid"></div>
+                </div>
+            </div>
+
+            <!-- Column 3: Saved Gradients -->
+            <div class="bg-white/5 p-6 rounded-2xl border border-white/5 shadow-xl h-full min-h-[500px] flex flex-col">
+                <header class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-white">Kaydedilenler</h3>
+                    <span class="bg-white/10 px-2 py-0.5 rounded text-xs text-gray-400" id="savedCount">0</span>
+                </header>
+
+                <div id="savedList" class="flex-1 space-y-3 overflow-y-auto max-h-[600px] pr-2 custom-scrollbar">
+                    <!-- Saved items will appear here -->
+                    <div class="text-center text-gray-500 mt-10 text-sm">Henüz kayıt yok.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-3 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] font-bold translate-y-24 opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd" />
+        </svg>
+        Panoya kopyalandı!
+    </div>
+
+    <script>
+        // DOM Elements
+        const color1Input = document.getElementById('color1');
+        const color2Input = document.getElementById('color2');
+        const hue1Input = document.getElementById('hue1');
+        const hue2Input = document.getElementById('hue2');
+        const angleInput = document.getElementById('angle');
+        const angleValue = document.getElementById('angleValue');
+        const gradientPreview = document.getElementById('gradientPreview');
+        const cssOutput = document.getElementById('cssOutput');
+        const copyBtn = document.getElementById('copyBtn');
+        const toast = document.getElementById('toast');
+        const color1Wrapper = document.getElementById('color1Wrapper');
+        const color2Wrapper = document.getElementById('color2Wrapper');
+        const color1Label = document.getElementById('color1Label');
+        const color2Label = document.getElementById('color2Label');
+        const typeLinearBtn = document.getElementById('typeLinear');
+        const typeRadialBtn = document.getElementById('typeRadial');
+        const angleContainer = document.getElementById('angleContainer');
+        const presetsGrid = document.getElementById('presetsGrid');
+
+        let gradientType = 'linear'; // linear or radial
+
+        // Presets Data
+        const presets = [
+            { c1: '#FF00CC', c2: '#333399', hue1: 300, hue2: 240, ang: 135 }, // Default
+            { c1: '#00FF99', c2: '#00ccff', hue1: 156, hue2: 192, ang: 45 },  // Cyan-Mint
+            { c1: '#FF3300', c2: '#FFCC00', hue1: 12, hue2: 48, ang: 90 },    // Sunset
+            { c1: '#CC00FF', c2: '#00FFCC', hue1: 288, hue2: 168, ang: 180 }, // Retro
+            { c1: '#0000FF', c2: '#FF0000', hue1: 240, hue2: 0, ang: 135 },   // Classic
+        ];
+
+        // Init Presets
+        presets.forEach(p => {
+            const el = document.createElement('div');
+            el.className = 'preset-circle';
+            el.style.background = `linear-gradient(135deg, ${p.c1}, ${p.c2})`;
+            el.title = 'Uygula';
+            el.onclick = () => loadPreset(p);
+            presetsGrid.appendChild(el);
+        });
+
+        function loadPreset(p) {
+            hue1Input.value = p.hue1;
+            hue2Input.value = p.hue2;
+            angleInput.value = p.ang;
+            updateFromHue1(); // this updates color1 value
+            updateFromHue2(); // this updates color2 value, calls updateGradient
+            // Force angle update in case logic didn't pick it up (though inputs are set)
+        }
+
+        function setGradientType(type) {
+            gradientType = type;
+            if (type === 'linear') {
+                typeLinearBtn.classList.add('text-white', 'bg-white/10', 'shadow-lg');
+                typeLinearBtn.classList.remove('text-gray-400');
+                typeRadialBtn.classList.remove('text-white', 'bg-white/10', 'shadow-lg');
+                typeRadialBtn.classList.add('text-gray-400');
+                angleContainer.style.opacity = '1';
+                angleContainer.style.pointerEvents = 'auto';
+            } else {
+                typeRadialBtn.classList.add('text-white', 'bg-white/10', 'shadow-lg');
+                typeRadialBtn.classList.remove('text-gray-400');
+                typeLinearBtn.classList.remove('text-white', 'bg-white/10', 'shadow-lg');
+                typeLinearBtn.classList.add('text-gray-400');
+                // Disable angle for simple radial
+                angleContainer.style.opacity = '0.3';
+                angleContainer.style.pointerEvents = 'none';
+            }
+            updateGradient();
+        }
+
+        // HSL to Hex Conversion
+        function hslToHex(h, s, l) {
+            s /= 100; l /= 100;
+            let c = (1 - Math.abs(2 * l - 1)) * s,
+                x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+                m = l - c / 2,
+                r = 0, g = 0, b = 0;
+            if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+            else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+            else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+            else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+            else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+            else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+            const toHex = n => {
+                const hex = Math.round((n + m) * 255).toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            };
+            return "#" + toHex(r) + toHex(g) + toHex(b);
+        }
+
+        // Update colors from Hue Sliders
+        function updateFromHue1() {
+            const hex = hslToHex(hue1Input.value, 100, 50); // Neon: Full Sat, Medium Light
+            color1Input.value = hex;
+            updateGradient();
+        }
+
+        function updateFromHue2() {
+            const hex = hslToHex(hue2Input.value, 100, 50);
+            color2Input.value = hex;
+            updateGradient();
+        }
+
+        function randomizeGradient() {
+            const h1 = Math.floor(Math.random() * 361);
+            const h2 = Math.floor(Math.random() * 361);
+            const ang = Math.floor(Math.random() * 361);
+            hue1Input.value = h1;
+            hue2Input.value = h2;
+            angleInput.value = ang;
+            updateFromHue1();
+            updateFromHue2();
+        }
+
+        function updateGradient() {
+            const c1 = color1Input.value;
+            const c2 = color2Input.value;
+            const angle = angleInput.value;
+
+            // Update Preview based on Type
+            let gradientCSS = '';
+            if (gradientType === 'linear') {
+                gradientCSS = `linear-gradient(${angle}deg, ${c1}, ${c2})`;
+            } else {
+                gradientCSS = `radial-gradient(circle at center, ${c1}, ${c2})`;
+            }
+
+            gradientPreview.style.background = gradientCSS;
+
+            // Neon Glow
+            gradientPreview.style.boxShadow = `0 0 50px ${c1}40, 0 0 100px ${c2}20`;
+
+            // Update Text
+            angleValue.textContent = `${angle}°`;
+            if (gradientType === 'linear') {
+                cssOutput.textContent = `background: linear-gradient\n(${angle}deg, ${c1}, ${c2});`;
+            } else {
+                cssOutput.textContent = `background: radial-gradient\n(circle at center, ${c1}, ${c2});`;
+            }
+
+            // Update UI Elements
+            color1Wrapper.style.borderColor = c1;
+            color2Wrapper.style.borderColor = c2;
+            color1Wrapper.style.boxShadow = `0 0 15px ${c1}60`;
+            color2Wrapper.style.boxShadow = `0 0 15px ${c2}60`;
+            color1Label.textContent = c1.toUpperCase();
+            color2Label.textContent = c2.toUpperCase();
+        }
+
+        function copyToClipboard() {
+            const code = cssOutput.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast();
+            });
+        }
+
+        function showToast() {
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 2000);
+        }
+
+        const saveBtn = document.getElementById('saveBtn');
+        const savedList = document.getElementById('savedList');
+        const savedCount = document.getElementById('savedCount');
+
+        let savedGradients = [];
+
+        function saveGradient() {
+            const current = {
+                c1: color1Input.value,
+                c2: color2Input.value,
+                hue1: hue1Input.value,
+                hue2: hue2Input.value,
+                ang: angleInput.value,
+                type: gradientType,
+                id: Date.now()
+            };
+            savedGradients.unshift(current);
+            renderSaved();
+        }
+
+        function deleteSaved(id, e) {
+            e.stopPropagation();
+            savedGradients = savedGradients.filter(g => g.id !== id);
+            renderSaved();
+        }
+
+        function loadSaved(g) {
+            hue1Input.value = g.hue1 || 0;
+            hue2Input.value = g.hue2 || 0;
+            angleInput.value = g.ang;
+            setGradientType(g.type || 'linear');
+            updateFromHue1();
+            updateFromHue2();
+            // Colors update automatically via updateFromHue calls
+        }
+
+        function renderSaved() {
+            savedList.innerHTML = '';
+            savedCount.textContent = savedGradients.length;
+
+            if (savedGradients.length === 0) {
+                savedList.innerHTML = '<div class="text-center text-gray-500 mt-10 text-sm">Henüz kayıt yok.</div>';
+                return;
+            }
+
+            savedGradients.forEach(g => {
+                const div = document.createElement('div');
+                div.className = 'saved-item flex items-center gap-3 p-3 rounded-xl cursor-pointer bg-white/5';
+                div.onclick = () => loadSaved(g);
+
+                const css = g.type === 'linear'
+                    ? `linear-gradient(${g.ang}deg, ${g.c1}, ${g.c2})`
+                    : `radial-gradient(circle at center, ${g.c1}, ${g.c2})`;
+
+                div.innerHTML = `
+                    <div class="w-10 h-10 rounded-full border border-white/20 shadow-sm flex-shrink-0" style="background: ${css}"></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs text-gray-400 font-mono truncate">${g.c1} -> ${g.c2}</div>
+                        <div class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">${g.type}</div>
+                    </div>
+                    <button class="delete-btn p-2 text-gray-400 hover:text-red-400 transition-colors" onclick="deleteSaved(${g.id}, event)">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                `;
+                savedList.appendChild(div);
+            });
+        }
+
+        // Event Listeners
+        color1Input.addEventListener('input', updateGradient);
+        color2Input.addEventListener('input', updateGradient);
+        hue1Input.addEventListener('input', updateFromHue1);
+        hue2Input.addEventListener('input', updateFromHue2);
+        angleInput.addEventListener('input', updateGradient);
+        copyBtn.addEventListener('click', copyToClipboard);
+        saveBtn.addEventListener('click', saveGradient);
+        document.getElementById('randomBtn').addEventListener('click', randomizeGradient);
+
+        typeLinearBtn.addEventListener('click', () => setGradientType('linear'));
+        typeRadialBtn.addEventListener('click', () => setGradientType('radial'));
+
+        // Initial Call
+        updateGradient();
+        renderSaved();
+    </script>
+</body>
+
+</html>

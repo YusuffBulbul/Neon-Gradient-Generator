@@ -1,0 +1,25 @@
+# System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDES
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (if used in future)
+node_modules/
+dist/
+build/
+
+# Agent Artifacts
+.gemini/
+.agent/
+*.webp
+*.png
