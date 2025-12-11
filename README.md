@@ -2,6 +2,8 @@
 
 Modern, şık ve neon estetiğine sahip, CSS `linear-gradient` ve `radial-gradient` kodlarını anında oluşturmanızı sağlayan web tabanlı bir araçtır.
 
+🚀 **Canlı Önizleme:** [https://YusuffBulbul.github.io/Neon-Gradient-Generator/](https://YusuffBulbul.github.io/Neon-Gradient-Generator/)
+
 ## 🌟 Özellikler
 
 *   **Canlı Önizleme**: Renkleri ve açıyı değiştirdiğinizde anlık olarak sonucu görün.
